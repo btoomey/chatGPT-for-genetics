@@ -20,11 +20,11 @@ with open("graphql_query_ulcerative_colitis.txt", "r") as f:
 with open("graphql_query_vorinostat.txt", "r") as f:
     prompt_template_vorinostat = f.read()
 
+with open("graphql_query_tamoxifen.txt", "r") as f:
+    prompt_template_tamoxifen = f.read()
+
 with open("open_targets_gql_schema.txt", "r") as f:
     open_targets_schema = f.read()
-
-# Prime the target query for completion
-prime_prompt = "query top_n_associated_diseases {\n  search(queryString:"
 
 # Custom input by the user
 # user_input = "Find the top 2 diseases associated with BRCA1"
@@ -77,6 +77,16 @@ messages = [
         "role": "system",
         "name": "example_assistant",
         "content": prompt_template_vorinostat
+    },
+    {
+        "role": "system",
+        "name": "example_user",
+        "content": "Tell me the diseases treated by Tamoxifen."
+    },
+    {
+        "role": "system",
+        "name": "example_assistant",
+        "content": prompt_template_tamoxifen
     },
     {
         "role": "user",

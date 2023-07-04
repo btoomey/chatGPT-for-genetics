@@ -1,0 +1,10 @@
+query top_n_associated_diseases {
+  search(queryString: "Tamoxifen", entityNames: "disease") {
+   hits { object {
+            ... on Disease{
+              name
+            }
+       }
+  	}
+  }
+}
