@@ -1,0 +1,11 @@
+query known_drugs_for_colitis {
+    search(queryString: "Ulcerative colitis", entityNames: "knownDrugs") {
+        hits {
+            object{
+                ... on Drug{
+                    name
+                }
+            }
+  	    }
+	}
+}

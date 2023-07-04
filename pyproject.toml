@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "chatgpt-for-genetics"
+version = "0.1.0"
+description = ""
+authors = ["Bridget Toomey <bridget@lumindx.com>"]
+readme = "README.md"
+packages = [{include = "chatgpt_for_genetics"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+openai = "^0.27.8"
+requests = "^2.31.0"
+tiktoken = "^0.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

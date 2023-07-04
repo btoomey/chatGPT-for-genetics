@@ -1,0 +1,16 @@
+query top_n_associated_diseases {
+  search(queryString: "APOE", entityNames: "target") {
+   hits { object {
+              ... on Target {
+             associatedDiseases(page: {index: 0, size: 5}) {
+                rows {
+                  disease {
+                    name
+                      }
+                   }
+               }
+           }
+       }
+    }
+  }
+}

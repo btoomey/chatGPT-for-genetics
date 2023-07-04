@@ -1,0 +1,11 @@
+query drug_targets {
+    search(queryString: "vorinostat", entityNames: "target") {
+        hits {
+            object {
+                ... on Target {
+			        approvedSymbol
+                }
+            }
+        }
+    }
+}
