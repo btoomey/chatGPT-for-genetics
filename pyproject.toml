@@ -2,15 +2,19 @@
 name = "chatgpt-for-genetics"
 version = "0.1.0"
 description = ""
-authors = ["Bridget Toomey <bridget@lumindx.com>"]
+authors = ["Bridget Toomey"]
 readme = "README.md"
 packages = [{include = "chatgpt_for_genetics"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 openai = "^0.27.8"
 requests = "^2.31.0"
 tiktoken = "^0.4.0"
+langchain = {extras = ["llms"], version = "^0.0.223"}
+httpx = "^0.24.1"
+gql = "^3.4.1"
+requests-toolbelt = "^1.0.0"
 
 
 [build-system]

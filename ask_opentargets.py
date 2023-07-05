@@ -30,11 +30,124 @@ with open("open_targets_gql_schema.txt", "r") as f:
 # user_input = "Find the top 2 diseases associated with BRCA1"
 user_input = input("How can I help you today?\n")
 
+
+
+
+
 # To keep my costs low as I develop this application, I'm going to use 
 # gpt-3.5-turbo instead of the older Da Vinci models.
 # The downside of this model is that it requires more prompting/examples.
 # (See https://stackoverflow.com/questions/76192496/openai-v1-completions-vs-v1-chat-completions-end-points)
 # TO-DO: Provide examples conditional on type of input text
+
+def submit_opentargets_query(query_string, called_to_get_id):
+    # Set base URL of GraphQL API endpoint
+    base_url = "https://api.platform.opentargets.org/api/v4/graphql"
+
+    # Perform POST request and check status code of response
+    # This handles the cases where the Open Targets API is down or our query is invalid
+    try:
+        response = requests.post(base_url, json={"query": query_string})
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    
+
+    # Transform API response from JSON into Python dictionary
+    api_response = json.loads(response.text)
+    # TO-DO: Figure out if we only want 0th element here
+    hits_list = api_response["data"]["search"]["hits"][0]
+    if called_to_get_id:
+        hits_list = hits_list['id']
+    return hits_list
+
+
+# Much of this work was based on this OpenAI example notebook: 
+# https://github.com/openai/openai-cookbook/blob/950246dd0810470291aa9728c404a01aeab5a1e9/examples/How_to_call_functions_for_knowledge_retrieval.ipynb
+def get_downstream_id(orig_str, str_type):
+    valid_str_type_vals = ['Disease', 'Drug', 'Target']
+    entity_vals = ['diseases', 'knownDrugs', 'genes']
+    str_type_to_entity_val = {
+        k: v for k, v in zip(valid_str_type_vals, entity_vals)
+    }
+    if str_type not in valid_str_type_vals:
+        raise ValueError(f'str_type must be one of {valid_str_type_vals}')
+
+    query_string = f"""query desired_id {{
+        search(queryString: {orig_str}, entityNames: {str_type_to_entity_val[str_type]}) {{
+            hits {{
+            object {{
+                ... on {str_type} {{
+                    id
+                }}
+            }}
+            }}
+        }}
+        }}
+    """
+    return submit_opentargets_query(
+        query_string=query_string, called_to_get_id=True
+    )
+
+def submit_query_w_id()
+
+# def get_disease_id(disease_str):
+#     """This function uses the OpenTargets GraphQL API to obtain the efoId of a given disease.
+#     The efoId is needed to call downstream functions."""
+#     query_str = f"""query disease_id {{
+#         search(queryString: {disease_str}, entityNames: diseases) {{
+#             hits {{
+#             object {{
+#                 ... on Disease {{
+#                 name
+#                 id
+#                 }}
+#             }}
+#             }}
+#         }}
+#         }}
+#     """
+#     return submit_opentargets_query(query_string=query_str)
+
+# def get_drug_id(drug_str):
+#     """This function uses the OpenTargets GraphQL API to obtain the chemblId of a given drug.
+#     The chemblId is needed to call downstream functions."""
+#     query_str = f"""query chemblId {{
+#         search(queryString: {drug_str}, entityNames: "knownDrugs") {{
+#             hits {{ 
+#                 object {{
+#                     ... on Drug {{
+#                         name
+#                         id
+#                     }}
+#                 }}
+#             }}
+#         }}
+#     }}"""
+
+#     return submit_opentargets_query(query_string=query_str)
+
+# def get_gene_id(gene_str):
+#     """This function uses the OpenTargets GraphQL API to obtain the ensemblId of a given gene.
+#     The ensemblId is needed to call downstream functions."""
+#     query_str = f"""query ensemblId {{
+#         search(queryString: {gene_str}, entityNames: "genes") {{
+#             hits {{ 
+#                 object {{
+#                     ... on Target {{
+#                         name
+#                         id
+#                     }}
+#                 }}
+#             }}
+#         }}
+#     }}"""
+
+#     return submit_opentargets_query(query_string=query_str)
+
+
+
+prime_prompt = "query "
 messages = [
     {
         "role": "system",
@@ -94,14 +207,13 @@ messages = [
     },
     {
         "role": "assistant",
-        "content": "query "
+        "content": prime_prompt
     }
 ]
 
 response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo-16k",
     messages=messages,
-    # prompt=prompt_template + "### " + user_input + "\n" + prime_prompt,
     temperature=0,
     max_tokens=250,
     top_p=1,
@@ -111,46 +223,26 @@ response = openai.ChatCompletion.create(
 )
 response_text = response['choices'][0]['message']['content']
 
-# response = openai.Completion.create(
-#     model="gpt-3.5-turbo",
-#     prompt=prompt_template + "### " + user_input + "\n" + prime_prompt,
-#     temperature=0,
-#     max_tokens=250,
-#     top_p=1,
-#     frequency_penalty=0,
-#     presence_penalty=0,
-#     stop=["###"],
-# )
-# response_text = response["choices"][0].text
+
 print(f'response_text: {response_text}', flush=True)
 
-# query_string = prime_prompt + response_text
+query_string = prime_prompt + response_text
 
-# # filename with current date and time
-# query_file = "query_" + datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p") + ".txt"
+# filename with current date and time
+query_file = "query_" + datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p") + ".txt"
 
-# # write query to file with current date and time
-# with open(query_file, "w") as f:
-#     f.write(f"# User input: {user_input}\n")
-#     f.write(query_string)
-#     print(f"\nCustom graphQL query was written to file: {query_file}")
+# write query to file with current date and time
+with open(query_file, "w") as f:
+    f.write(f"# User input: {user_input}\n")
+    f.write(query_string)
+    print(f"\nCustom graphQL query was written to file: {query_file}")
 
-# # Set base URL of GraphQL API endpoint
-# base_url = "https://api.platform.opentargets.org/api/v4/graphql"
 
-# # Perform POST request and check status code of response
-# # This handles the cases where the Open Targets API is down or our query is invalid
-# try:
-#     response = requests.post(base_url, json={"query": query_string})
-#     response.raise_for_status()
-# except requests.exceptions.HTTPError as err:
-#     print(err)
 
-# # Transform API response from JSON into Python dictionary and print in console
-# api_response = json.loads(response.text)
-# hits_list = api_response["data"]["search"]["hits"][0]
+print("\n\nQuerying Open Targets genetics database...\n\n")
 
-# print("\n\nQuerying Open Targets genetics database...\n\n")
+print("hits_list")
+print(hits_list)
 
 # disease_list = extract_values(hits_list, "disease")
 # for i, j in enumerate(disease_list):
