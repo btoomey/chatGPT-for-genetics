@@ -89,7 +89,6 @@ def get_downstream_id(orig_str, str_type):
         query_string=query_string, called_to_get_id=True
     )
 
-def submit_query_w_id()
 
 # def get_disease_id(disease_str):
 #     """This function uses the OpenTargets GraphQL API to obtain the efoId of a given disease.
@@ -148,6 +147,69 @@ def submit_query_w_id()
 
 
 prime_prompt = "query "
+# messages = [
+#     {
+#         "role": "system",
+#         "content": f"Here is the schema of the Open Targets Platform GraphQL endpoint: {open_targets_schema}"
+#     },
+#     {
+#         "role": "system",
+#         "content": "You are generating GraphQL queries to the Open Targets Platform endpoint. Only return the query itself. Do not describe the query or summarize it in any way."
+#     },
+#     {
+#         "role": "system",
+#         "content": "If the user ever asks a question with the same meaning as one of the previous example questions, provide the corresponding example answer."
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_user",
+#         "content": "What are the top 5 diseases associated with APOE?"
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_assistant",
+#         "content": prompt_template_apoe
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_user",
+#         "content": "What are the top drugs that can treat ulcerative colitis?"
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_assistant",
+#         "content": prompt_template_ulcerative_colitis
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_user",
+#         "content": "What are the main targets of vorinostat?"
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_assistant",
+#         "content": prompt_template_vorinostat
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_user",
+#         "content": "Tell me the diseases treated by Tamoxifen."
+#     },
+#     {
+#         "role": "system",
+#         "name": "example_assistant",
+#         "content": prompt_template_tamoxifen
+#     },
+#     {
+#         "role": "user",
+#         "content": user_input
+#     },
+#     {
+#         "role": "assistant",
+#         "content": prime_prompt
+#     }
+# ]
+
 messages = [
     {
         "role": "system",
@@ -159,60 +221,23 @@ messages = [
     },
     {
         "role": "system",
-        "content": "If the user ever asks a question with the same meaning as one of the previous example questions, provide the corresponding example answer."
-    },
-    {
-        "role": "system",
-        "name": "example_user",
-        "content": "What are the top 5 diseases associated with APOE?"
-    },
-    {
-        "role": "system",
-        "name": "example_assistant",
-        "content": prompt_template_apoe
-    },
-    {
-        "role": "system",
-        "name": "example_user",
-        "content": "What are the top drugs that can treat ulcerative colitis?"
-    },
-    {
-        "role": "system",
-        "name": "example_assistant",
-        "content": prompt_template_ulcerative_colitis
-    },
-    {
-        "role": "system",
-        "name": "example_user",
-        "content": "What are the main targets of vorinostat?"
-    },
-    {
-        "role": "system",
-        "name": "example_assistant",
-        "content": prompt_template_vorinostat
-    },
-    {
-        "role": "system",
-        "name": "example_user",
-        "content": "Tell me the diseases treated by Tamoxifen."
-    },
-    {
-        "role": "system",
-        "name": "example_assistant",
-        "content": prompt_template_tamoxifen
-    },
-    {
-        "role": "user",
-        "content": user_input
-    },
-    {
-        "role": "assistant",
-        "content": prime_prompt
+        "content": """Follow these steps to answer the user queries.
+
+        Step 1 - Decide whether the query is a one-step or a two-step query. A one-step query is something like: 
+        'Find drugs that are used for treating cystic fibrosis.' A two-step query is something like: 'Show all
+        diseases that have at least 3 pathways associated with ALS." Two-step queries require resolving at least two queries.
+        In the ALS example, you must first determine all of the pathways associated with ALS. Then you must
+        determine all of the diseases associated with each pathway. Then you take the union of all of these diseases
+        and for each disease in the union, you obtain a count of the number of pathways associated with ALS that
+        they're also associated with. Enclose all your work for this step within triple quotes (\"\"\").
+        Step 2 - Submit a query to the Open Targets Platform endpoint to determine the 
+        """
     }
+
 ]
 
 response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo-16k",
+    model="gpt-4",
     messages=messages,
     temperature=0,
     max_tokens=250,
@@ -239,10 +264,10 @@ with open(query_file, "w") as f:
 
 
 
-print("\n\nQuerying Open Targets genetics database...\n\n")
+# print("\n\nQuerying Open Targets genetics database...\n\n")
 
-print("hits_list")
-print(hits_list)
+# print("hits_list")
+# print(hits_list)
 
 # disease_list = extract_values(hits_list, "disease")
 # for i, j in enumerate(disease_list):

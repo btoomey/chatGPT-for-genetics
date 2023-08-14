@@ -1,0 +1,12 @@
+# User input: Show me the top drugs for melanoma.
+query top_n_associated_drugs {
+  search(queryString: "melanoma", entityNames: "knownDrugs") {
+    hits {
+      object {
+        ... on Drug {
+          name
+        }
+      }
+    }
+  }
+}

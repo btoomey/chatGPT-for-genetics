@@ -136,6 +136,22 @@ step_by_step_outline += """
 step_by_step_outline += "Then, you would use the `flatten` function to flatten all of the results into a single list."
 step_by_step_outline += "Finally, you would call `subset_list(flattened_list, 5)` and return this subsetted output to the user."
 
+outline_w_intermediate_outputs = """Follow these steps to answer the user queries.
+
+    Step 1 - Decide whether the query is a one-step or a two-step query. A one-step query is something like: 
+    'What are the targets of vorinostat?' A two-step query is something like: 'Show all
+    diseases that have at least 3 pathways associated with ALS.' Two-step queries require resolving at least two queries.
+    In the ALS example, you must first determine all of the pathways associated with ALS. Then you must
+    determine all of the diseases associated with each pathway. Then you take the union of all of these diseases
+    and for each disease in the union, you obtain a count of the number of pathways associated with ALS that
+    they're also associated with. Enclose all your work for this step within triple quotes (\"\"\").
+    Step 2 - Submit a query to the Open Targets Platform endpoint to determine the ID of the first attribute.
+    In a one-step query about a drug like 'What are the targets of vorinostat?' you would call `get_drug_id('vorinostat')`.
+    In a two-step query where the first entity was a disease, like 'Show all diseases that have at least 3 pathways 
+    associated with ALS.' you would call `get_disease_id('ALS')`. Enclose all your work for this step within triple 
+    quotes (\"\"\").
+    """
+
 messages = [
     SystemMessage(
         content=f"Here is the schema of the Open Targets Platform GraphQL endpoint: {open_targets_schema}"
@@ -144,7 +160,7 @@ messages = [
         content="You are a helpful assistant who can submit queries to the endpoint based on the user's requests. You always make sure to supply all arguments to any functions you invoke."
     ),
     SystemMessage(
-        content=step_by_step_outline
+        content=outline_w_intermediate_outputs
     )
 ]
 
